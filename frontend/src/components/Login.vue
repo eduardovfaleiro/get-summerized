@@ -116,7 +116,7 @@ export default {
 }
 
 .login-btn {
-  background-color: #6c63ff;
+  background-color: #ff964f;
   color: white;
   padding: 0.75rem;
   border: none;
