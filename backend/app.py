@@ -123,11 +123,11 @@ def summary():
     summary_type = request.form.get('summaryType')
 
     match summary_type:
-        case 'pequeno':
+        case 'short':
             prompt = 'Faça um pequeno resumo do texto abaixo:'
-        case 'medio':
+        case 'regular':
             prompt = 'Faça um resumo médio do texto abaixo:'
-        case 'topicos':
+        case 'topics':
             prompt = 'Faça um resumo em tópicos do texto abaixo:'
         case _:
             return jsonify({'message': 'Tipo de resumo não existe.'}), 400
@@ -150,7 +150,6 @@ def summary():
     client = genai.Client(api_key=api_key)
 
     try:
-        print(f'PROMPT: {prompt}\n\nTEXT: {text}')
         response = client.models.generate_content(
             model="gemini-2.0-flash", contents=f'{prompt}\n\n"{text}"\n\nO resumo do texto deve estar em português brasileiro.'
         )
