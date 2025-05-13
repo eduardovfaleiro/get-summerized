@@ -160,6 +160,25 @@ def summary():
         return jsonify({'message': 'Falha ao gerar resumo'}), 500
 
     return jsonify({'summary': summary_text}), 200
+@app.route('/extract-text', methods=['POST'])
+@jwt_required()
+def extract_text():
+    file = request.files.get('file')
+
+    if not file:
+        return jsonify({'message': 'Nenhum arquivo enviado.'}), 400
+
+    filename = secure_filename(file.filename)
+    file_ext = filename.lower().rsplit('.', 1)[-1]
+
+    if file_ext == 'pdf':
+        text = extrair_texto_pdf(file.stream)
+    elif file_ext == 'txt':
+        text = extrair_texto_txt(file.stream)
+    else:
+        return jsonify({'error': 'Tipo de arquivo não suportado'}), 400
+
+    return jsonify({'text': text}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

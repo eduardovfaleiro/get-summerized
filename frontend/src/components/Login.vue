@@ -1,27 +1,35 @@
 <template>
-  <div class="login-container">
-    <div class="login">
-      <h2>Bem-vindo ao GetSummerized!</h2>
-      <p>Entenda mais. Leia menos.</p>
+  <v-container class="fill-height" fluid>
+    <v-row  align="center" justify="center">
+      <v-card class="pa-6" outlined>
+        <v-card-title class="headline">Bem-vindo ao GetSummerized!</v-card-title>
+        <v-card-subtitle>Entenda mais. Leia menos.</v-card-subtitle>
 
-      <input v-model="email" type="email" placeholder="E-mail" :class="{ 'input-error': invalidFields.email }" />
-      <input v-model="password" type="password" placeholder="Senha"
-        :class="{ 'input-error': invalidFields.password }" />
+        <v-text-field v-model="email" label="E-mail" type="email" :error="invalidFields.email"
+          :error-messages="invalidFields.email ? 'Preencha o e-mail.' : ''" outlined dense />
 
-      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+        <v-text-field v-model="password" label="Senha" type="password" :error="invalidFields.password"
+          :error-messages="invalidFields.password ? 'Preencha a senha.' : ''" outlined dense />
 
-      <button class="login-btn" @click="login">Entrar</button>
+        <v-alert v-if="errorMessage" type="error" dense>
+          {{ errorMessage }}
+        </v-alert>
 
-      <p class="signup-link">
-        Não possui uma conta?
-        <router-link to="/register">Cadastrar</router-link>
-      </p>
-    </div>
-  </div>
+        <v-btn color="orange darken-2" block @click="login">
+          Entrar
+        </v-btn>
+
+        <div class="text-center mt-4">
+          <span>Não possui uma conta? <router-link to="/register">Cadastrar</router-link></span>
+        </div>
+      </v-card>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
 import axios from 'axios';
+import { auth } from '@/auth'
 
 export default {
   name: 'LoginPage',
@@ -38,9 +46,9 @@ export default {
   },
   methods: {
     login() {
-      // reseta flags
       this.invalidFields.email = false;
       this.invalidFields.password = false;
+      this.errorMessage = '';
 
       if (!this.email || !this.password) {
         if (!this.email) this.invalidFields.email = true;
@@ -54,11 +62,11 @@ export default {
         password: this.password
       })
         .then(response => {
-          localStorage.setItem('access_token', response.data.access_token);
+          auth.login(response.data.access_token);
+          // localStorage.setItem('access_token', response.data.access_token);
           this.$router.push('/welcome');
         })
         .catch(() => {
-          // marca ambos em erro para garantir feedback
           this.invalidFields.email = true;
           this.invalidFields.password = true;
           this.errorMessage = 'E-mail ou senha incorretos.';
@@ -69,72 +77,4 @@ export default {
 </script>
 
 <style scoped>
-* {
-  box-sizing: border-box;
-}
-
-.login-container {
-  display: flex;
-  height: 100vh;
-  font-family: sans-serif;
-}
-
-.login {
-  flex: 1;
-  padding: 4rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background-color: white;
-  max-width: 500px;
-  width: 100%;
-  margin: auto;
-}
-
-.login h2 {
-  font-size: 1.8rem;
-  margin-bottom: 0.5rem;
-}
-
-.login p:not(.error-message) {
-  margin-bottom: 1.5rem;
-  color: #666;
-}
-
-.login input {
-  margin-bottom: 1rem;
-  padding: 0.75rem;
-  font-size: 1rem;
-  width: 100%;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  transition: border-color 0.3s;
-}
-
-.input-error {
-  border-color: red !important;
-}
-
-.login-btn {
-  background-color: #ff964f;
-  color: white;
-  padding: 0.75rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  cursor: pointer;
-  width: 100%;
-}
-
-.signup-link {
-  margin-top: 1rem;
-  font-size: 0.9rem;
-}
-
-.error-message {
-  color: red;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-}
 </style>
