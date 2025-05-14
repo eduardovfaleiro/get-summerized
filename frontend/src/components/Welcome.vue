@@ -212,21 +212,19 @@ export default {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('/api/extract-text', {
-        method: 'POST',
-        headers: {
-          // Authorization: 'Bearer ' + localStorage.getItem('access_token'), // use seu token JWT
-          Authorization: 'Bearer ' + auth.token, // use seu token JWT
+      axios
+        .post('/api/extract-text', formData, {
+          headers: {
+          Authorization: 'Bearer ' + auth.token,
+          'Content-Type': 'multipart/form-data',
         },
-        body: formData,
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        this.textToSummarize = data.text; // preencher seu v-model do textarea
-      } else {
-        alert('Erro ao extrair texto: ' + data.message);
-      }
+        })
+        .then(res => {
+          this.textToSummarize = res.data.text
+        })
+        .catch(() => {
+          alert('Erro ao importar arquivo')
+        })
     },
     summarizeText() {
       if (!this.textToSummarize.trim() && !this.file) {
