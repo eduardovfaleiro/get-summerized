@@ -65,7 +65,7 @@ cursor.execute('''
 conn.commit()
 conn.close()
 
-@app.route('/register', methods=['POST'])
+@app.route('/api/register', methods=['POST'])
 def register():
     data = request.get_json()
     email = data.get('email')
@@ -87,7 +87,7 @@ def register():
     conn.close()
     return jsonify({'message': 'Usuário criado com sucesso'}), 201
 
-@app.route('/login', methods=['POST'])
+@app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
     email = data.get('email')
@@ -107,13 +107,13 @@ def login():
     else:
         return jsonify({'message': 'Credenciais inválidas'}), 401
 
-@app.route('/welcome', methods=['GET'])
+@app.route('/api/welcome', methods=['GET'])
 @jwt_required()
 def welcome():
     current_user = get_jwt_identity()
     return jsonify({'message': f'Bem-vindo, {current_user}!'}), 200
 
-@app.route('/summary', methods=['POST'])
+@app.route('/api/summary', methods=['POST'])
 @jwt_required()
 def summary():
     # data = request.get_json()
@@ -165,7 +165,7 @@ def summary():
         return jsonify({'message': 'Falha ao gerar resumo'}), 500
 
     return jsonify({'summary': summary_text}), 200
-@app.route('/extract-text', methods=['POST'])
+@app.route('/api/extract-text', methods=['POST'])
 @jwt_required()
 def extract_text():
     file = request.files.get('file')
