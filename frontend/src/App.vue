@@ -22,7 +22,7 @@
           contain
           min-width="100"
           src="@/assets/get-summerized-text.svg"
-          width="200"
+          width="175"
         />
       </div>
 
