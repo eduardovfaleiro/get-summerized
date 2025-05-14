@@ -1,24 +1,20 @@
 <template>
-  <v-container fluid class="fill-height pa-0">
-      <v-col cols="12" class="p-0">
-        <v-row dense no-gutters>
-          <v-col cols="12" md="6">
-            <v-card outlined class="px-4 pt-2 no-bottom-border no-top-right-radius">
-              <v-row align="center">
-                <v-col cols="12" md="6">
-                  <v-btn @click="triggerFileInput" color="primary" text>
-                    <v-icon left>mdi-upload</v-icon>
-                    Importar arquivo
-                  </v-btn>
-                  <input
-                    ref="uploader"
-                    type="file"
-                    @change="uploadFile"
-                    class="d-none"
-                  />
-                </v-col>
-                <v-col cols="12" md="6">
-                  <div class="text-caption">Tipo de resumo</div>
+  <div>
+    <v-container fluid class="fill-height pa-0">
+        <v-col cols="12" class="p-0">
+          <v-card outlined class="pa-2 no-top-radius">
+            <v-row dense>
+              <v-col cols="12" md="6" class="pr-2">
+                <v-textarea
+                  v-model="textToSummarize"
+                  placeholder="Digite ou cole seu texto aqui..."
+                  rows="10"
+                  outlined
+                  no-resize
+                  hide-details
+                />
+                <v-row align="center" class="ml-2 mt-2 mb-1">
+                  <div class="text-caption mr-4">Tipo de resumo</div>
                   <v-chip-group
                     v-model="summaryType"
                     row
@@ -34,82 +30,103 @@
                       {{ opt.text }}
                     </v-chip>
                   </v-chip-group>
-                </v-col>
-              </v-row>
-            </v-card>
-          </v-col>
-          <v-col cols="12" md="6">
-            <v-card outlined class="px-4 pt-2 no-bottom-border no-top-left-border">
-              <v-row align="center" style="height: 100px">
-                <v-btn @click="downloadSummaryPdf" color="primary" text>
-                  <v-icon left>mdi-download</v-icon>
-                  Baixar como PDF
+                </v-row>
+                <v-row dense>
+                  <v-col cols="12" lg="4">
+                    <v-btn block outlined color="red" @click="clearInput">
+                      <v-icon left>mdi-trash-can</v-icon> Limpar
+                    </v-btn>
+                  </v-col>
+                  <v-col cols="12" lg="4">
+                    <v-btn @click="triggerFileInput" color="primary" block outlined >
+                      <v-icon left>mdi-upload</v-icon>
+                      Importar arquivo
+                    </v-btn>
+                    <input
+                      ref="uploader"
+                      type="file"
+                      @change="uploadFile"
+                      class="d-none"
+                    />
+                  </v-col>
+                  <v-col cols="12" lg="4">
+                    <v-btn block outlined color="orange" @click="pasteFromClipboard">
+                      <v-icon left>mdi-clipboard-text</v-icon> Colar
+                    </v-btn>
+                  </v-col>
+                </v-row>
+                <v-btn
+                  block
+                  color="orange darken-2"
+                  :loading="loading"
+                  @click="summarizeText"
+                  class="my-2"
+                >
+                  {{ loading ? 'Resumindo...' : 'Resumir' }}
                 </v-btn>
-                <v-btn @click="downloadSummaryTxt" color="primary" text>
-                  <v-icon left>mdi-download</v-icon>
-                  Baixar como TXT
-                </v-btn>
-              </v-row>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-card outlined class="pa-4 no-top-radius">
-          <v-row dense>
-            <v-col cols="12" md="6">
-              <v-textarea
-                v-model="textToSummarize"
-                placeholder="Digite ou cole seu texto aqui..."
-                rows="12"
-                outlined
-                no-resize
-                hide-details
-              />
-              <v-row dense class="justify-end mt-2">
-                <v-col cols="6">
-                  <v-btn block outlined color="orange" @click="pasteFromClipboard">
-                    <v-icon left>mdi-clipboard-text</v-icon> Colar
-                  </v-btn>
-                </v-col>
-                <v-col cols="6">
-                  <v-btn block outlined color="red" @click="clearInput">
-                    <v-icon left>mdi-trash-can</v-icon> Limpar
-                  </v-btn>
-                </v-col>
-              </v-row>
-              <v-btn
-                class="mt-2"
-                block
-                color="orange darken-2"
-                :loading="loading"
-                @click="summarizeText"
-              >
-                {{ loading ? 'Resumindo...' : 'Resumir' }}
-              </v-btn>
-            </v-col>
+              </v-col>
 
-            <v-col cols="12" md="6" outine>
-              <v-sheet
-                outlined
-                rounded
-                style="height: 346px; overflow-y: auto; padding: 8px;"
-              >
-                <div v-html="summary"></div>
-              </v-sheet>
-              <v-row dense class="justify-end mt-2">
-                <v-col cols="6">
-                  <v-btn block outlined color="orange" @click="copySummary">
-                    <v-icon left>mdi-clipboard-text</v-icon>
-                    <transition name="fade">
-                      <span :key="copied">{{ copied ? 'Copiado!' : 'Copiar' }}</span>
-                    </transition>
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-col>
-          </v-row>
-        </v-card>
-      </v-col>
-  </v-container>
+              <v-divider vertical></v-divider>
+
+              <v-col cols="12" md="6" class="pl-2">
+                <v-sheet
+                  outlined
+                  rounded
+                  style="height: 290px; overflow-y: auto; padding: 8px;"
+                >
+                  <div v-html="summary"></div>
+                </v-sheet>
+                <v-btn block text @click="toggleFullScreen" class="my-3">
+                  <v-icon left>mdi-fullscreen</v-icon>
+                  Exibir em tela cheia
+                </v-btn>
+                <v-row dense class="justify-end mt-2">
+                  <v-col cols="12" lg="4">
+                    <v-btn @click="downloadSummaryPdf" color="primary" block outlined>
+                      <v-icon left>mdi-download</v-icon>
+                      Baixar como PDF
+                    </v-btn>
+                  </v-col>
+                  <v-col cols="12" lg="4">
+                    <v-btn @click="downloadSummaryTxt" color="primary" block outlined>
+                      <v-icon left>mdi-download</v-icon>
+                      Baixar como TXT
+                    </v-btn>
+                  </v-col>
+                  <v-col cols="12" lg="4">
+                    <v-btn block outlined color="orange" @click="copySummary" class="mb-2">
+                      <v-icon left>mdi-clipboard-text</v-icon>
+                      <transition name="fade">
+                        <span :key="copied">{{ copied ? 'Copiado!' : 'Copiar' }}</span>
+                      </transition>
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-col>
+    </v-container>
+
+    <v-dialog
+      v-model="fullScreen"
+      fullscreen
+      hide-overlay
+      transition="dialog-bottom-transition"
+    >
+      <v-card>
+        <v-toolbar dense flat>
+          <v-btn icon @click="toggleFullScreen">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+          <v-toolbar-title>Resumo</v-toolbar-title>
+        </v-toolbar>
+        <v-card-text style="overflow-y:auto; height: calc(100vh - 56px);">
+          <div v-html="summary"></div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+  </div>
 </template>
 
 
@@ -124,6 +141,7 @@ export default {
   data() {
     return {
       message: '',
+      fullScreen: false,
       textToSummarize: '',
       summary: '',
       loading: false,
@@ -139,7 +157,6 @@ export default {
     }
   },
   created() {
-    // const token = localStorage.getItem('access_token')
     const token = auth.token;
     axios
       .get('http://127.0.0.1:5000/welcome', {
@@ -153,6 +170,9 @@ export default {
       })
   },
   methods: {
+    toggleFullScreen() {
+      this.fullScreen = !this.fullScreen
+    },
     triggerFileInput() {
       this.$refs.uploader.click(); // Simula o clique no input de arquivo
     },
@@ -167,19 +187,23 @@ export default {
     },
     copySummary() {
       if (!this.summary) return;
-      
-      // extrai só o texto puro (sem tags) do summary
-      const text = this.summary.replace(/<[^>]+>/g, '\n').trim();
-      navigator.clipboard.writeText(text)
+
+      // Decodifica entidades HTML
+      const temp = document.createElement('div')
+      temp.innerHTML = this.summary
+      const decodedText = temp.textContent || temp.innerText || ''
+
+      // (Opcional) Remove tags HTML se houver risco de sobrar alguma
+      const cleanText = decodedText.replace(/<[^>]+>/g, '').trim()
+
+      navigator.clipboard.writeText(cleanText)
         .then(() => {
-          this.copied = true;
-          // volta ao normal após 1.5s
-          setTimeout(() => this.copied = false, 1500);
+          this.copied = true
+          setTimeout(() => this.copied = false, 1500)
         })
         .catch(() => {
-          // se falhar, você pode manter copiado=false ou mostrar erro
-          this.copied = false;
-        });
+          this.copied = false
+        })
     },
     async uploadFile(e) {
       const file = e.target.files[0];
@@ -232,15 +256,29 @@ export default {
         })
     },
     downloadSummaryPdf() {
-      const text = this.summary.replace(/<[^>]+>/g, '\n')
+      // Decodifica as entidades HTML
+      const temp = document.createElement('div')
+      temp.innerHTML = this.summary
+      const decodedText = temp.textContent || temp.innerText || ''
+
+      // Remove tags HTML, se necessário
+      const cleanText = decodedText.replace(/<[^>]+>/g, '')
+
+      // Gera o PDF
       const doc = new jsPDF()
-      const lines = doc.splitTextToSize(text, 180)
+      const lines = doc.splitTextToSize(cleanText, 180)
       doc.text(lines, 10, 10)
       doc.save('resumo.pdf')
     },
     downloadSummaryTxt() {
-      const text = this.summary.replace(/<[^>]+>/g, '\n')
-      const blob = new Blob([text], { type: 'text/plain' })
+      // Cria um elemento temporário para decodificar HTML
+      const temp = document.createElement('div')
+      temp.innerHTML = this.summary
+      const decodedText = temp.textContent || temp.innerText || ''
+
+      // Remove as tags (se ainda necessário) e salva como texto
+      const cleanText = decodedText.replace(/<[^>]+>/g, '\n')
+      const blob = new Blob([cleanText], { type: 'text/plain' })
       const link = document.createElement('a')
       link.href = URL.createObjectURL(blob)
       link.download = 'resumo.txt'
