@@ -159,7 +159,7 @@ export default {
   created() {
     const token = auth.token;
     axios
-      .get('http://127.0.0.1:5000/welcome', {
+      .get('/api/welcome', {
         headers: { Authorization: 'Bearer ' + token },
       })
       .then(res => {
@@ -241,7 +241,7 @@ export default {
       form.append('summaryType', this.summaryType)
 
       axios
-        .post('http://127.0.0.1:5000/summary', form, {
+        .post('/api/summary', form, {
           // headers: { Authorization: 'Bearer ' + localStorage.getItem('access_token') }
           headers: { Authorization: 'Bearer ' + auth.token }
         })
