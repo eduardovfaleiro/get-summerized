@@ -1,0 +1,80 @@
+<template>
+  <v-container class="fill-height" fluid>
+    <v-row  align="center" justify="center">
+      <v-card class="pa-6" outlined>
+        <v-card-title class="headline" style="word-break: break-word;">Bem-vindo ao GetSummerized!</v-card-title>
+        <v-card-subtitle>Entenda mais. Leia menos.</v-card-subtitle>
+
+        <v-text-field v-model="email" label="E-mail" type="email" :error="invalidFields.email"
+          :error-messages="invalidFields.email ? 'Preencha o e-mail.' : ''" outlined dense />
+
+        <v-text-field v-model="password" label="Senha" type="password" :error="invalidFields.password"
+          :error-messages="invalidFields.password ? 'Preencha a senha.' : ''" outlined dense />
+
+        <v-alert v-if="errorMessage" type="error" dense>
+          {{ errorMessage }}
+        </v-alert>
+
+        <v-btn color="orange darken-2" block @click="login">
+          Entrar
+        </v-btn>
+
+        <div class="text-center mt-4">
+          <span>Não possui uma conta? <router-link to="/register">Cadastrar</router-link></span>
+        </div>
+      </v-card>
+    </v-row>
+  </v-container>
+</template>
+
+<script>
+import axios from 'axios';
+import { auth } from '@/auth'
+
+export default {
+  name: 'LoginPage',
+  data() {
+    return {
+      email: '',
+      password: '',
+      errorMessage: '',
+      invalidFields: {
+        email: false,
+        password: false
+      }
+    };
+  },
+  methods: {
+    login() {
+      this.invalidFields.email = false;
+      this.invalidFields.password = false;
+      this.errorMessage = '';
+
+      if (!this.email || !this.password) {
+        if (!this.email) this.invalidFields.email = true;
+        if (!this.password) this.invalidFields.password = true;
+        this.errorMessage = 'Preencha e-mail e senha.';
+        return;
+      }
+
+      axios.post('/api/login', {
+        email: this.email,
+        password: this.password
+      })
+        .then(response => {
+          auth.login(response.data.access_token);
+          // localStorage.setItem('access_token', response.data.access_token);
+          this.$router.push('/welcome');
+        })
+        .catch(() => {
+          this.invalidFields.email = true;
+          this.invalidFields.password = true;
+          this.errorMessage = 'E-mail ou senha incorretos.';
+        });
+    }
+  }
+};
+</script>
+
+<style scoped>
+</style>
