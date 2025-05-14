@@ -212,7 +212,7 @@ export default {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('http://localhost:5000/extract-text', {
+      const response = await fetch('/api/extract-text', {
         method: 'POST',
         headers: {
           // Authorization: 'Bearer ' + localStorage.getItem('access_token'), // use seu token JWT
