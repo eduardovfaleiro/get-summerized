@@ -1,17 +1,17 @@
-# Usa uma imagem oficial do Python
+# Use imagem base com Python
 FROM python:3.10-slim
 
-# Define o diretório de trabalho no container
+# Define diretório de trabalho
 WORKDIR /app
 
-# Copia os arquivos do projeto para dentro do container
-COPY . /app
+# Copia os arquivos
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
 
-# Instala as dependências
-RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
 
-# Expõe a porta 8080 (que o Cloud Run usa)
+# Expõe a porta
 EXPOSE 8080
 
-# Comando para iniciar o servidor (ajuste se estiver usando Flask/FastAPI/etc.)
+# Comando para iniciar o app
 CMD ["python", "app.py"]
