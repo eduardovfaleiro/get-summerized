@@ -1,12 +1,11 @@
 <template>
   <v-container fluid class="fill-height pa-0">
       <v-col cols="12" class="p-0">
-        <!-- Summarizer Panels -->
         <v-row dense no-gutters>
-          <v-col cols="6">
+          <v-col cols="12" md="6">
             <v-card outlined class="px-4 pt-2 no-bottom-border no-top-right-radius">
-              <v-row align="center" style="height: 100px">
-                <v-col cols="6">
+              <v-row align="center">
+                <v-col cols="12" md="6">
                   <v-btn @click="triggerFileInput" color="primary" text>
                     <v-icon left>mdi-upload</v-icon>
                     Importar arquivo
@@ -18,7 +17,7 @@
                     class="d-none"
                   />
                 </v-col>
-                <v-col cols="6">
+                <v-col cols="12" md="6">
                   <div class="text-caption">Tipo de resumo</div>
                   <v-chip-group
                     v-model="summaryType"
@@ -39,7 +38,7 @@
               </v-row>
             </v-card>
           </v-col>
-          <v-col cols="6">
+          <v-col cols="12" md="6">
             <v-card outlined class="px-4 pt-2 no-bottom-border no-top-left-border">
               <v-row align="center" style="height: 100px">
                 <v-btn @click="downloadSummaryPdf" color="primary" text>
@@ -56,7 +55,6 @@
         </v-row>
         <v-card outlined class="pa-4 no-top-radius">
           <v-row dense>
-            <!-- Input Panel -->
             <v-col cols="12" md="6">
               <v-textarea
                 v-model="textToSummarize"
@@ -64,8 +62,9 @@
                 rows="12"
                 outlined
                 no-resize
+                hide-details
               />
-              <v-row dense class="justify-end">
+              <v-row dense class="justify-end mt-2">
                 <v-col cols="6">
                   <v-btn block outlined color="orange" @click="pasteFromClipboard">
                     <v-icon left>mdi-clipboard-text</v-icon> Colar
@@ -78,7 +77,7 @@
                 </v-col>
               </v-row>
               <v-btn
-                class="mt-4"
+                class="mt-2"
                 block
                 color="orange darken-2"
                 :loading="loading"
@@ -88,7 +87,6 @@
               </v-btn>
             </v-col>
 
-            <!-- Output Panel -->
             <v-col cols="12" md="6" outine>
               <v-sheet
                 outlined
@@ -97,7 +95,7 @@
               >
                 <div v-html="summary"></div>
               </v-sheet>
-              <v-row dense class="justify-end mt-5">
+              <v-row dense class="justify-end mt-2">
                 <v-col cols="6">
                   <v-btn block outlined color="orange" @click="copySummary">
                     <v-icon left>mdi-clipboard-text</v-icon>
