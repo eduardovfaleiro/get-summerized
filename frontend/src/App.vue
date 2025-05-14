@@ -15,14 +15,14 @@
           contain
           src="@/assets/get-summerized-logo.svg"
           transition="scale-transition"
-          width="40"
+          :width="$vuetify.breakpoint.xs ? 28 : 40"
         />
         <v-img
           alt="GetSummerized Text"
           contain
           min-width="100"
           src="@/assets/get-summerized-text.svg"
-          width="175"
+          :width="$vuetify.breakpoint.xs ? 130 : 175"
         />
       </div>
 

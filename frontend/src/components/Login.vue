@@ -2,7 +2,7 @@
   <v-container class="fill-height" fluid>
     <v-row  align="center" justify="center">
       <v-card class="pa-6" outlined>
-        <v-card-title class="headline">Bem-vindo ao GetSummerized!</v-card-title>
+        <v-card-title class="headline" style="word-break: break-word;">Bem-vindo ao GetSummerized!</v-card-title>
         <v-card-subtitle>Entenda mais. Leia menos.</v-card-subtitle>
 
         <v-text-field v-model="email" label="E-mail" type="email" :error="invalidFields.email"
