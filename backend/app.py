@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, redirect, request, jsonify, url_for
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -10,21 +10,44 @@ import PyPDF2
 from dotenv import load_dotenv
 import os
 from pathlib import Path
+from authlib.integrations.flask_client import OAuth
 
 # Carrega .env da raiz do projeto
 env_path = Path(__file__).resolve().parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
-# def extrair_texto_pdf(caminho_pdf):
-#     doc = fitz.open(caminho_pdf)
-#     texto = ""
-#     for pagina in doc:
-#         texto += pagina.get_text()
-#     return texto
+app = Flask(__name__)
+CORS(app)  # permite chamadas de fora (frontend)
 
-# def extrair_texto_txt(caminho_txt):
-#     with open(caminho_txt, 'r', encoding='utf-8') as f:
-#         return f.read()
+app.config['JWT_SECRET_KEY'] = 'senha-secreta-trocanaforma-segura'
+jwt = JWTManager(app)
+
+oauth = OAuth(app)
+google = oauth.register(
+    name='google',
+    client_id=os.getenv('GOOGLE_CLIENT_ID'),
+    client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
+    access_token_url='https://oauth2.googleapis.com/token',
+    access_token_params=None,
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+    authorize_params={'access_type': 'offline', 'prompt': 'consent'},
+    api_base_url='https://www.googleapis.com/oauth2/v1/',
+    userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',
+    client_kwargs={'scope': 'openid email profile'}
+)
+
+# Criar (ou conectar) ao banco de dados SQLite e criar tabela de usuários
+conn = sqlite3.connect('users.db')
+cursor = conn.cursor()
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL
+    )
+''')
+conn.commit()
+conn.close()
 
 def extrair_texto_pdf(file_stream):
     """
@@ -45,25 +68,6 @@ def extrair_texto_txt(file_stream):
     file_stream.seek(0)
     # file_stream.read() devolve bytes
     return file_stream.read().decode('utf-8')
-
-app = Flask(__name__)
-CORS(app)  # permite chamadas de fora (frontend)
-
-app.config['JWT_SECRET_KEY'] = 'senha-secreta-trocanaforma-segura'
-jwt = JWTManager(app)
-
-# Criar (ou conectar) ao banco de dados SQLite e criar tabela de usuários
-conn = sqlite3.connect('users.db')
-cursor = conn.cursor()
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL
-    )
-''')
-conn.commit()
-conn.close()
 
 @app.route('/api/register', methods=['POST'])
 def register():
@@ -86,6 +90,27 @@ def register():
     conn.commit()
     conn.close()
     return jsonify({'message': 'Usuário criado com sucesso'}), 201
+
+@app.route('/login/google')
+def login_google():
+    redirect_uri = url_for('authorize_google', _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+@app.route('/login/google/callback')
+def authorize_google():
+    token = google.authorize_access_token()
+    resp = google.get('userinfo')
+    user_info = resp.json()
+
+    # Aqui você pode criar ou buscar o usuário no seu banco
+    # e gerar um token JWT ou sessão
+    email = user_info['email']
+    name = user_info['name']
+
+    # Exemplo de resposta com redirecionamento + token
+    access_token = gerar_token_para(email)  # Você cria essa função
+    frontend_url = f"http://localhost:8080/welcome?token={access_token}"
+    return redirect(frontend_url)
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -184,9 +209,6 @@ def extract_text():
         return jsonify({'error': 'Tipo de arquivo não suportado'}), 400
 
     return jsonify({'text': text}), 200
-
-# if __name__ == '__main__':
-#     app.run(debug=True)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)

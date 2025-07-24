@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Login from '@/components/Login'
 import Register from '@/components/Register'
 import Welcome from '@/components/Welcome'
+import { jwtDecode } from 'jwt-decode';
 
 Vue.use(VueRouter)
 
@@ -22,45 +23,21 @@ const router = new VueRouter({
   routes
 })
 
+function isTokenExpired(token) {
+  if (!token) return true;
+  const { exp } = jwtDecode(token);
+  if (!exp) return true;
+  const now = Date.now() / 1000; // timestamp em segundos
+  return exp < now;
+}
+
 // Guarda global: bloqueia /welcome sem token
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
     const token = localStorage.getItem('access_token')
-    if (!token) return next('/login')
+    if (isTokenExpired(token)) return next('/login')
   }
   next()
 })
 
 export default router
-
-
-// import Vue from 'vue'
-// import VueRouter from 'vue-router'
-// import HomeView from '../views/HomeView.vue'
-// import Login from '@/components/Login';
-// import Register from '@/components/Register';
-// import Welcome from '@/components/Welcome';
-
-// Vue.use(VueRouter)
-
-// const routes = [
-//   {
-//     path: '/',
-//     name: 'home',
-//     component: HomeView
-//   },
-//   {
-//     path: '/about',
-//     name: 'about',
-//     // route level code-splitting
-//     // this generates a separate chunk (about.[hash].js) for this route
-//     // which is lazy-loaded when the route is visited.
-//     component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-//   }
-// ]
-
-// const router = new VueRouter({
-//   routes
-// })
-
-// export default router

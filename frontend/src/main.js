@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import vuetify from './plugins/vuetify' // <- importação do Vuetify
+import './axiosConfig'
 
 Vue.config.productionTip = false
 

@@ -134,7 +134,6 @@
 import axios from 'axios'
 import { marked } from 'marked'
 import { jsPDF } from 'jspdf'
-import { auth } from '@/auth'
 
 export default {
   name: 'WelcomePage',
@@ -146,7 +145,6 @@ export default {
       summary: '',
       loading: false,
       summaryType: 'regular',
-      file: null,
       exportExtension: 'txt',
       summaryOptions: [
         { text: 'Pequeno',  value: 'short'   },
@@ -157,11 +155,8 @@ export default {
     }
   },
   created() {
-    const token = auth.token;
     axios
-      .get('/api/welcome', {
-        headers: { Authorization: 'Bearer ' + token },
-      })
+      .get('/api/welcome')
       .then(res => {
         this.message = res.data.message
       })
@@ -178,7 +173,6 @@ export default {
     },
     clearInput() {
       this.textToSummarize = ''
-      this.file = null
     },
     pasteFromClipboard() {
       navigator.clipboard.readText().then(txt => {
@@ -213,12 +207,7 @@ export default {
       formData.append('file', file);
 
       axios
-        .post('/api/extract-text', formData, {
-          headers: {
-          Authorization: 'Bearer ' + auth.token,
-          'Content-Type': 'multipart/form-data',
-        },
-        })
+        .post('/api/extract-text', formData)
         .then(res => {
           this.textToSummarize = res.data.text
         })
@@ -234,15 +223,11 @@ export default {
       this.summary = ''
 
       const form = new FormData()
-      form.append('file', this.file)
       form.append('text', this.textToSummarize)
       form.append('summaryType', this.summaryType)
 
       axios
-        .post('/api/summary', form, {
-          // headers: { Authorization: 'Bearer ' + localStorage.getItem('access_token') }
-          headers: { Authorization: 'Bearer ' + auth.token }
-        })
+        .post('/api/summary', form)
         .then(res => {
           this.summary = marked(res.data.summary)
         })

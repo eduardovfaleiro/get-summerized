@@ -19,6 +19,13 @@
           Entrar
         </v-btn>
 
+        <v-divider class="my-4"></v-divider>
+
+        <v-btn color="red darken-1" block @click="loginWithGoogle">
+          <v-icon left>mdi-google</v-icon>
+          Entrar com Google
+        </v-btn>
+
         <div class="text-center mt-4">
           <span>Não possui uma conta? <router-link to="/register">Cadastrar</router-link></span>
         </div>
@@ -45,6 +52,9 @@ export default {
     };
   },
   methods: {
+    loginWithGoogle() {
+      window.location.href = '/api/auth/google';
+    },
     login() {
       this.invalidFields.email = false;
       this.invalidFields.password = false;
@@ -63,7 +73,6 @@ export default {
       })
         .then(response => {
           auth.login(response.data.access_token);
-          // localStorage.setItem('access_token', response.data.access_token);
           this.$router.push('/welcome');
         })
         .catch(() => {
