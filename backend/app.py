@@ -1,5 +1,5 @@
 import os
-from flask import Flask, redirect, request, jsonify, url_for
+from flask import Flask, json, redirect, request, jsonify, send_file, url_for
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -21,6 +21,9 @@ load_dotenv(dotenv_path=env_path)
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 CORS(app)  # permite chamadas de fora (frontend)
+
+with open('config.json') as f:
+    config = json.load(f)
 
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 jwt = JWTManager(app)
@@ -71,6 +74,10 @@ def extrair_texto_txt(file_stream):
     file_stream.seek(0)
     # file_stream.read() devolve bytes
     return file_stream.read().decode('utf-8')
+
+@app.route('/api/config')
+def get_config():
+    return jsonify(config)
 
 @app.route('/api/register', methods=['POST'])
 def register():
@@ -173,6 +180,9 @@ def summary():
             text = extrair_texto_txt(file.stream)
         else:
             return jsonify({'error': 'Tipo de arquivo não suportado'}), 400
+
+    if (len(text) > config['MAX_LENGTH']):
+        return jsonify({'error': 'Texto muito longo'}), 400
 
     api_key = os.environ.get("GEMINI_API_KEY")
     genai.configure(api_key=api_key)

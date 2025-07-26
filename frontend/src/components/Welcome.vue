@@ -11,7 +11,8 @@
                   rows="10"
                   outlined
                   no-resize
-                  hide-details
+                  :maxlength="maxLength"
+                  :rules="[v => v.length <= maxLength || `Máximo de ${maxLength} caracteres`]"
                 />
                 <v-row align="center" class="ml-2 mt-2 mb-1">
                   <div class="text-caption mr-4">Tipo de resumo</div>
@@ -58,6 +59,7 @@
                 <v-btn
                   block
                   color="orange darken-2"
+                  :disabled="isSubmitDisabled"
                   :loading="loading"
                   @click="summarizeText"
                   class="my-2"
@@ -146,6 +148,8 @@ export default {
       loading: false,
       summaryType: 'regular',
       exportExtension: 'txt',
+      // TODO(continuar daqui)
+      maxLength: 10,
       summaryOptions: [
         { text: 'Pequeno',  value: 'short'   },
         { text: 'Médio',    value: 'regular' },
@@ -163,8 +167,22 @@ export default {
       .catch(() => {
         this.$router.push('/login')
       })
+
+    axios.get('/api/config').then(res => {
+      this.maxLength = res.data.MAX_LENGTH
+    })
+  },
+  computed: {
+    isSubmitDisabled() {
+      return (
+        this.textToSummarize.length === 0 ||
+        this.textToSummarize.length > this.maxLength ||
+        this.loading
+      )
+    }
   },
   methods: {
+    
     toggleFullScreen() {
       this.fullScreen = !this.fullScreen
     },
