@@ -53,7 +53,7 @@ export default {
   },
   methods: {
     loginWithGoogle() {
-      window.location.href = '/api/auth/google';
+      window.location.href = '/api/login/google';
     },
     login() {
       this.invalidFields.email = false;

@@ -1,7 +1,7 @@
 import os
 from flask import Flask, redirect, request, jsonify, url_for
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import google.generativeai as genai
@@ -12,14 +12,17 @@ import os
 from pathlib import Path
 from authlib.integrations.flask_client import OAuth
 
+from jwt_utils import generate_token
+
 # Carrega .env da raiz do projeto
 env_path = Path(__file__).resolve().parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY')
 CORS(app)  # permite chamadas de fora (frontend)
 
-app.config['JWT_SECRET_KEY'] = 'senha-secreta-trocanaforma-segura'
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 jwt = JWTManager(app)
 
 oauth = OAuth(app)
@@ -91,12 +94,12 @@ def register():
     conn.close()
     return jsonify({'message': 'Usuário criado com sucesso'}), 201
 
-@app.route('/login/google')
+@app.route('/api/login/google')
 def login_google():
     redirect_uri = url_for('authorize_google', _external=True)
     return google.authorize_redirect(redirect_uri)
 
-@app.route('/login/google/callback')
+@app.route('/api/login/google/callback')
 def authorize_google():
     token = google.authorize_access_token()
     resp = google.get('userinfo')
@@ -108,7 +111,7 @@ def authorize_google():
     name = user_info['name']
 
     # Exemplo de resposta com redirecionamento + token
-    access_token = gerar_token_para(email)  # Você cria essa função
+    access_token = generate_token(email)
     frontend_url = f"http://localhost:8080/welcome?token={access_token}"
     return redirect(frontend_url)
 
@@ -127,7 +130,7 @@ def login():
     conn.close()
     if result and check_password_hash(result[0], password):
         # Gera token JWT com o username
-        access_token = create_access_token(identity=email)
+        access_token = generate_token(email)
         return jsonify({'access_token': access_token}), 200
     else:
         return jsonify({'message': 'Credenciais inválidas'}), 401
