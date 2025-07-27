@@ -182,7 +182,6 @@ export default {
     }
   },
   methods: {
-    
     toggleFullScreen() {
       this.fullScreen = !this.fullScreen
     },
@@ -230,7 +229,7 @@ export default {
           this.textToSummarize = res.data.text
         })
         .catch(() => {
-          alert('Erro ao importar arquivo')
+          this.$toast.error('Erro ao importar arquivo')
         })
     },
     summarizeText() {
