@@ -33,13 +33,13 @@ google = oauth.register(
     name='google',
     client_id=os.getenv('GOOGLE_CLIENT_ID'),
     client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
-    access_token_url='https://oauth2.googleapis.com/token',
-    access_token_params=None,
-    authorize_url='https://accounts.google.com/o/oauth2/auth',
-    authorize_params={'access_type': 'offline', 'prompt': 'consent'},
-    api_base_url='https://www.googleapis.com/oauth2/v1/',
-    userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',
-    client_kwargs={'scope': 'openid email profile'}
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    api_base_url='https://openidconnect.googleapis.com/v1/',
+    client_kwargs={
+        'scope': 'openid email profile',
+        'prompt': 'consent',
+        'access_type': 'offline'
+    }
 )
 
 # Criar (ou conectar) ao banco de dados SQLite e criar tabela de usuários
@@ -119,8 +119,7 @@ def authorize_google():
 
     # Exemplo de resposta com redirecionamento + token
     access_token = generate_token(email)
-    frontend_url = f"http://localhost:8080/welcome?token={access_token}"
-    return redirect(frontend_url)
+    return redirect(f"http://localhost:8081/welcome?token={access_token}")
 
 @app.route('/api/login', methods=['POST'])
 def login():
