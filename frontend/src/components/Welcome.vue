@@ -136,6 +136,7 @@
 import axios from 'axios'
 import { marked } from 'marked'
 import { jsPDF } from 'jspdf'
+import { auth } from '@/auth'
 
 export default {
   name: 'WelcomePage',
@@ -148,7 +149,6 @@ export default {
       loading: false,
       summaryType: 'regular',
       exportExtension: 'txt',
-      // TODO(continuar daqui)
       maxLength: 10,
       summaryOptions: [
         { text: 'Pequeno',  value: 'short'   },
@@ -159,14 +159,20 @@ export default {
     }
   },
   created() {
-    axios
-      .get('/api/welcome')
-      .then(res => {
-        this.message = res.data.message
-      })
-      .catch(() => {
-        this.$router.push('/login')
-      })
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    if (token) {
+      auth.login(token)
+    }
+
+    // axios
+    //   .get('/api/welcome')
+    //   .then(res => {
+    //     this.message = res.data.message
+    //   })
+    //   .catch(() => {
+    //     this.$router.push('/login')
+    //   })
 
     axios.get('/api/config').then(res => {
       this.maxLength = res.data.MAX_LENGTH
