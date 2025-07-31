@@ -55,7 +55,7 @@ cursor.execute('''
 conn.commit()
 conn.close()
 
-def extrair_texto_pdf(file_stream):
+def extract_pdf_text(file_stream):
     """
     Lê o fluxo PDF direto da memória e retorna todo o texto.
     """
@@ -67,7 +67,7 @@ def extrair_texto_pdf(file_stream):
         texto += page.extract_text() or ''
     return texto
 
-def extrair_texto_txt(file_stream):
+def extract_txt_text(file_stream):
     """
     Lê o fluxo TXT direto da memória e retorna o conteúdo como string.
     """
@@ -175,9 +175,9 @@ def summary():
         file_ext = filename.lower().rsplit('.', 1)[-1]
 
         if file_ext == 'pdf':
-            text = extrair_texto_pdf(file.stream)
+            text = extract_pdf_text(file.stream)
         elif file_ext == 'txt':
-            text = extrair_texto_txt(file.stream)
+            text = extract_txt_text(file.stream)
         else:
             return jsonify({'error': 'Tipo de arquivo não suportado'}), 400
 
@@ -215,9 +215,9 @@ def extract_text():
     file_ext = filename.lower().rsplit('.', 1)[-1]
 
     if file_ext == 'pdf':
-        text = extrair_texto_pdf(file.stream)
+        text = extract_pdf_text(file.stream)
     elif file_ext == 'txt':
-        text = extrair_texto_txt(file.stream)
+        text = extract_txt_text(file.stream)
     else:
         return jsonify({'error': 'Tipo de arquivo não suportado'}), 400
 
