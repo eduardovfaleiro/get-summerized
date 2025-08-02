@@ -4,6 +4,7 @@ import Login from '@/components/Login'
 import Register from '@/components/Register'
 import Welcome from '@/components/Welcome'
 import { jwtDecode } from 'jwt-decode';
+import { auth } from '@/auth'
 
 Vue.use(VueRouter)
 
@@ -34,8 +35,7 @@ function isTokenExpired(token) {
 // Guarda global: bloqueia /welcome sem token
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    const token = localStorage.getItem('access_token')
-    if (isTokenExpired(token)) return next('/login')
+    if (isTokenExpired(auth.token)) return next('/login')
   }
   next()
 })
