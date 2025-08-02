@@ -119,7 +119,7 @@ def authorize_google():
 
     # Exemplo de resposta com redirecionamento + token
     access_token = generate_token(email)
-    return redirect(f"http://localhost:8081/welcome?token={access_token}")
+    return redirect(f"http://localhost:8081/#/welcome?token={access_token}")
 
 @app.route('/api/login', methods=['POST'])
 def login():
