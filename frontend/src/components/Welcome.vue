@@ -136,7 +136,6 @@
 import axios from 'axios'
 import { marked } from 'marked'
 import { jsPDF } from 'jspdf'
-import { auth } from '@/auth'
 
 export default {
   name: 'WelcomePage',
@@ -159,12 +158,6 @@ export default {
     }
   },
   created() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-    if (token) {
-      auth.login(token)
-    }
-
     // axios
     //   .get('/api/welcome')
     //   .then(res => {
