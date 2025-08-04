@@ -227,9 +227,6 @@ export default {
         .then(res => {
           this.textToSummarize = res.data.text
         })
-        .catch(() => {
-          this.$toast.error('Erro ao importar arquivo')
-        })
     },
     summarizeText() {
       if (!this.textToSummarize.trim() && !this.file) {
@@ -246,9 +243,6 @@ export default {
         .post('/api/summary', form)
         .then(res => {
           this.summary = marked(res.data.summary)
-        })
-        .catch(() => {
-          this.$toast.error('Erro ao gerar o resumo.')
         })
         .finally(() => {
           this.loading = false
