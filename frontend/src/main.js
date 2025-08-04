@@ -6,6 +6,7 @@ import './axiosConfig'
 import Toast from "vue-toastification"
 import "vue-toastification/dist/index.css"
 import { auth } from './auth.js'
+import { registerToast } from './utils/toast'
 
 // TODO(melhorar isso aqui)
 const hash = window.location.hash; // Ex: "#/welcome?token=abc123"
@@ -20,8 +21,12 @@ if (token) {
 Vue.use(Toast)
 Vue.config.productionTip = false
 
-new Vue({
+const app = new Vue({
   router,
   vuetify, // <- aqui você adiciona o Vuetify à instância
   render: h => h(App)
-}).$mount('#app')
+})
+
+registerToast(app.$toast)
+
+app.$mount('#app')
