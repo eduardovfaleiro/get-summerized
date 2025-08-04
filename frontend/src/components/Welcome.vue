@@ -243,8 +243,9 @@ export default {
         .post('/api/summary', form)
         .then(res => {
           this.summary = marked(res.data.summary)
-        })
-        .finally(() => {
+        }).catch(() => {
+          // Deixar assim p/ não exibir erro
+        }).finally(() => {
           this.loading = false
         })
     },
