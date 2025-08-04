@@ -11,6 +11,8 @@ from dotenv import load_dotenv
 import os
 from pathlib import Path
 from authlib.integrations.flask_client import OAuth
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from jwt_utils import generate_token
 
@@ -41,6 +43,13 @@ google = oauth.register(
         'access_type': 'offline'
     }
 )
+
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["100 per hour"]
+)
+
 
 # Criar (ou conectar) ao banco de dados SQLite e criar tabela de usuários
 conn = sqlite3.connect('users.db')
@@ -149,6 +158,7 @@ def welcome():
 
 @app.route('/api/summary', methods=['POST'])
 @jwt_required()
+@limiter.limit('1 per minute')
 def summary():
     # data = request.get_json()
 
