@@ -47,7 +47,7 @@ google = oauth.register(
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=["5/minute"]
+    default_limits=["10/minute"]
 )
 
 
@@ -85,7 +85,6 @@ def extract_txt_text(file_stream):
     return file_stream.read().decode('utf-8')
 
 @app.route('/api/config')
-@limiter.limit('10/minute')
 def get_config():
     return jsonify(config)
 
