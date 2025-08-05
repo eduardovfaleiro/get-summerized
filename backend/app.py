@@ -16,6 +16,8 @@ from flask_limiter.util import get_remote_address
 
 from jwt_utils import generate_token
 
+LOGIN_RATE_LIMIT = '5/minute'
+
 # Carrega .env da raiz do projeto
 env_path = Path(__file__).resolve().parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
@@ -110,12 +112,20 @@ def register():
     conn.close()
     return jsonify({'message': 'Usuário criado com sucesso'}), 201
 
+# Serve para checar se não passou do limite de requisições.
+@app.route('/api/login/google/initiate')
+@limiter.limit(LOGIN_RATE_LIMIT)
+def initiate_login_google():
+    return jsonify({"status": "ok"}), 200
+
 @app.route('/api/login/google')
+@limiter.limit(LOGIN_RATE_LIMIT)
 def login_google():
     redirect_uri = url_for('authorize_google', _external=True)
     return google.authorize_redirect(redirect_uri)
 
 @app.route('/api/login/google/callback')
+@limiter.limit(LOGIN_RATE_LIMIT)
 def authorize_google():
     token = google.authorize_access_token()
     resp = google.get('userinfo')
@@ -158,7 +168,7 @@ def welcome():
 
 @app.route('/api/summary', methods=['POST'])
 @jwt_required()
-@limiter.limit('1 per minute')
+@limiter.limit('5 per minute')
 def summary():
     # data = request.get_json()
 
@@ -212,6 +222,7 @@ def summary():
         return jsonify({'message': 'Falha ao gerar resumo'}), 500
 
     return jsonify({'summary': summary_text}), 200
+
 @app.route('/api/extract-text', methods=['POST'])
 @jwt_required()
 def extract_text():

@@ -37,6 +37,7 @@
 <script>
 import axios from 'axios';
 import { auth } from '@/auth'
+import { safeRequest } from '@/utils/safeRequest';
 
 export default {
   name: 'LoginPage',
@@ -52,9 +53,12 @@ export default {
     };
   },
   methods: {
-    //TODO(testar)
-    loginWithGoogle() {
-      window.location.href = '/api/login/google';
+    async loginWithGoogle() {
+      const response = await safeRequest(() => axios.get('/api/login/google/initiate'))
+
+      if (response) {
+        window.location.href = '/api/login/google'
+      }
     },
     login() {
       this.invalidFields.email = false;
