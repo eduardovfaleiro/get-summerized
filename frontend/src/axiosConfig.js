@@ -15,8 +15,10 @@ axios.interceptors.response.use(response => response, error => {
 
     switch(status) {
         case 401:
-            auth.logout()
-            router.push('/login');
+            if (router.currentRoute.path !== '/login') {
+                auth.logout();
+                router.push('/login');
+            }
             break
         case 429:
             showToastOncePerInterval('Você atingiu o limite de uso. Tente novamente mais tarde.')

@@ -52,6 +52,7 @@ export default {
     };
   },
   methods: {
+    //TODO(testar)
     loginWithGoogle() {
       window.location.href = '/api/login/google';
     },
@@ -75,10 +76,12 @@ export default {
           auth.login(response.data.access_token);
           this.$router.push('/welcome');
         })
-        .catch(() => {
-          this.invalidFields.email = true;
-          this.invalidFields.password = true;
-          this.errorMessage = 'E-mail ou senha incorretos.';
+        .catch(error => {
+          if (error.response && error.response.status == 401) {
+            this.invalidFields.email = true;
+            this.invalidFields.password = true;
+            this.errorMessage = 'E-mail ou senha incorretos.';
+          }
         });
     }
   }

@@ -136,6 +136,7 @@
 import axios from 'axios'
 import { marked } from 'marked'
 import { jsPDF } from 'jspdf'
+import { safeRequest } from '@/utils/safeRequest'
 
 export default {
   name: 'WelcomePage',
@@ -148,7 +149,7 @@ export default {
       loading: false,
       summaryType: 'regular',
       exportExtension: 'txt',
-      maxLength: 10,
+      maxLength: 5000,
       summaryOptions: [
         { text: 'Pequeno',  value: 'short'   },
         { text: 'Médio',    value: 'regular' },
@@ -166,10 +167,13 @@ export default {
     //   .catch(() => {
     //     this.$router.push('/login')
     //   })
-
-    axios.get('/api/config').then(res => {
-      this.maxLength = res.data.MAX_LENGTH
+    
+    safeRequest(() => {
+      return axios.get('/api/config').then(res => {
+        this.maxLength = res.data.MAX_LENGTH
+      })
     })
+
   },
   computed: {
     isSubmitDisabled() {
@@ -222,11 +226,11 @@ export default {
       const formData = new FormData();
       formData.append('file', file);
 
-      axios
+      safeRequest(() => axios
         .post('/api/extract-text', formData)
         .then(res => {
           this.textToSummarize = res.data.text
-        })
+        }))
     },
     summarizeText() {
       if (!this.textToSummarize.trim() && !this.file) {
