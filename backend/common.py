@@ -1,5 +1,6 @@
 import os
-from flask import Flask, json
+import sqlite3
+from flask import Flask, g, json
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -19,3 +20,14 @@ with open(config_path) as f:
 
 # Carrega caminho do database
 db_path = os.path.join(basedir, 'users.db')
+
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect(db_path)
+    return g.db
+
+@app.teardown_appcontext
+def close_db(exception):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()

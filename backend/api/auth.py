@@ -1,10 +1,10 @@
 from flask import Blueprint, jsonify, request, url_for
 from flask_mail import Message
 from werkzeug.security import generate_password_hash, check_password_hash
-from backend.app import get_db
-from backend.common import s, mail
+from backend.common import get_db
 from backend.jwt_utils import generate_token
 from backend.utils import validate_email
+from backend.app import mail, s
 
 auth_bp = Blueprint('auth_bp', __name__)
 
