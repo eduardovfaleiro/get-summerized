@@ -12,7 +12,7 @@ from backend.common import close_db, get_db, mail
 
 # Importe os Blueprints
 from backend.api.auth import auth_bp
-from backend.api.google import google_bp
+from backend.api.google import google_bp, init_oauth
 from backend.api.summary import summary_bp
 
 env_path = Path(__file__).resolve().parent.parent / '.env'
@@ -21,6 +21,7 @@ load_dotenv(dotenv_path=env_path)
 def create_app():
     """Cria e configura a aplicação Flask."""
     app = Flask(__name__)
+    init_oauth(app)
 
     # --- Configurações da Aplicação ---
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
