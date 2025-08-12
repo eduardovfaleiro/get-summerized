@@ -1,10 +1,9 @@
 import os
-from flask import Blueprint, jsonify, redirect, url_for
+from flask import Blueprint, current_app, jsonify, redirect, url_for
 from authlib.integrations.flask_client import OAuth
 from backend.jwt_utils import generate_token
-from backend.common import app
 
-oauth = OAuth(app)
+oauth = OAuth(current_app)
 
 client_id = os.getenv('GOOGLE_CLIENT_ID')
 client_secret = os.getenv('GOOGLE_CLIENT_SECRET')

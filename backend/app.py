@@ -1,61 +1,111 @@
 import os
-from flask import jsonify
+from flask import Flask, json, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-import sqlite3
-import os
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_mail import Mail
 from itsdangerous import URLSafeTimedSerializer
+import sqlite3
+from pathlib import Path
+from dotenv import load_dotenv
 
-from backend.common import app, config, db_path, get_db
+# Importe os Blueprints
 from backend.api.auth import auth_bp
 from backend.api.google import google_bp
 from backend.api.summary import summary_bp
 
-app.secret_key = os.getenv('SECRET_KEY')
-CORS(app)
+basedir = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(basedir, 'users.db')
 
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect(db_path)
+    return g.db
 
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
+@app.teardown_appcontext
+def close_db(exception):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
 
-mail = Mail(app)
-jwt = JWTManager(app)
+# Cria as instâncias de Flask-Mail e do serializador fora da função
+# para que possam ser importadas e usadas nos blueprints.
+mail = Mail()
 
-s = URLSafeTimedSerializer(app.secret_key)
+env_path = Path(__file__).resolve().parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
-limiter = Limiter(
-    get_remote_address,
-    app=app,
-    default_limits=["10/minute"]
-)
+def create_app():
+    """Cria e configura a aplicação Flask."""
+    app = Flask(__name__)
 
-conn = get_db()
-cursor = conn.cursor()
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL
-    )
-''')
-conn.commit()
-conn.close()
+    # --- Configurações da Aplicação ---
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USE_SSL'] = True
+    app.config['MAIL_USE_TLS'] = False
+    app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+    app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
 
-@app.route('/api/config')
-def get_config():
-    return jsonify(config)
+    # Adicione a chave secreta para o URLSafeTimedSerializer
+    app.secret_key = os.getenv('SECRET_KEY')
 
-app.register_blueprint(auth_bp, url_prefix='/api')
-app.register_blueprint(google_bp, url_prefix='/api')
-app.register_blueprint(summary_bp, url_prefix='/api')
+    # --- Inicializa as extensões do Flask ---
+    CORS(app)
+    JWTManager(app)
+    Limiter(get_remote_address, app=app, default_limits=["10/minute"])
+    
+    # Inicializa o Flask-Mail e o serializador com o aplicativo
+    mail.init_app(app)
+    app.config['SERIALIZER'] = URLSafeTimedSerializer(app.secret_key)
+
+    basedir = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(basedir, 'config.json')
+
+    with open(config_path) as f:
+        config = json.load(f)
+
+    # --- Registro de Blueprints ---
+    app.register_blueprint(auth_bp, url_prefix='/api')
+    app.register_blueprint(google_bp, url_prefix='/api')
+    app.register_blueprint(summary_bp, url_prefix='/api')
+
+    # --- Rotas da API (se houverem) ---
+    @app.route('/api/config')
+    def get_config():
+        """Retorna as configurações da aplicação."""
+        return jsonify(config)
+
+    # Adicione o teardown para fechar o banco de dados
+    app.teardown_appcontext(close_db)
+
+    return app
+
+def init_db(app):
+    """Inicializa o banco de dados, criando as tabelas se não existirem."""
+    with app.app_context():
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL
+            )
+        ''')
+
+        try:
+            cursor.execute("SELECT is_verified FROM users")
+        except sqlite3.OperationalError:
+            cursor.execute("ALTER TABLE users ADD COLUMN is_verified BOOLEAN NOT NULL DEFAULT 0")
+
+        conn.commit()
+    # A conexão é fechada automaticamente pelo teardown do app_context
 
 if __name__ == "__main__":
+    app = create_app()
+    init_db(app) # Inicializa o banco de dados
     app.run(host="0.0.0.0", port=8080)
