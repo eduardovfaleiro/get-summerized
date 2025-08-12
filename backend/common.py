@@ -2,7 +2,7 @@
 import os
 import sqlite3
 
-from flask import g
+from flask import g, json
 from flask_mail import Mail
 
 
@@ -20,3 +20,9 @@ def close_db(exception):
         db.close()
 
 mail = Mail()
+
+basedir = os.path.dirname(os.path.abspath(__file__))
+config_path = os.path.join(basedir, 'config.json')
+
+with open(config_path) as f:
+    config = json.load(f)

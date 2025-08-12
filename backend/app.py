@@ -8,7 +8,7 @@ from itsdangerous import URLSafeTimedSerializer
 import sqlite3
 from pathlib import Path
 from dotenv import load_dotenv
-from backend.common import close_db, get_db, mail
+from backend.common import close_db, get_db, mail, config
 
 # Importe os Blueprints
 from backend.api.auth import auth_bp
@@ -45,11 +45,6 @@ def create_app():
     mail.init_app(app)
     app.config['SERIALIZER'] = URLSafeTimedSerializer(app.secret_key)
 
-    basedir = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(basedir, 'config.json')
-
-    with open(config_path) as f:
-        config = json.load(f)
 
     # --- Registro de Blueprints ---
     app.register_blueprint(auth_bp, url_prefix='/api')

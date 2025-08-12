@@ -4,6 +4,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
 from werkzeug.utils import secure_filename
 import google.generativeai as genai
+from backend.common import config
 
 summary_bp = Blueprint('summary_bp', __name__)
 
@@ -60,7 +61,6 @@ def summary():
         else:
             return jsonify({'error': 'Tipo de arquivo não suportado'}), 400
 
-    # todo(vai dar problema)
     if (len(text) > config['MAX_LENGTH']):
         return jsonify({'error': 'Texto muito longo'}), 400
 
