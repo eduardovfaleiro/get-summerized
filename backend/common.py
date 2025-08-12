@@ -3,6 +3,7 @@ import os
 import sqlite3
 
 from flask import g
+from flask_mail import Mail
 
 
 basedir = os.path.dirname(os.path.abspath(__file__))
@@ -13,8 +14,9 @@ def get_db():
         g.db = sqlite3.connect(db_path)
     return g.db
 
-@app.teardown_appcontext
 def close_db(exception):
     db = g.pop('db', None)
     if db is not None:
         db.close()
+
+mail = Mail()

@@ -1,14 +1,14 @@
-from flask import Blueprint, jsonify, request, url_for
+from flask import Blueprint, current_app, jsonify, request, url_for
 from flask_mail import Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from backend.jwt_utils import generate_token
 from backend.utils.validate_email import validate_email
-from backend.app import mail, s, get_db
+from backend.common import get_db, mail
 
 auth_bp = Blueprint('auth_bp', __name__)
 
 def generate_verification_token(email):
-    return s.dumps(email, salt='email-verification-salt')
+    return current_app.config['SERIALIZER'].dumps(email, salt='email-verification-salt')
 
 def send_verification_email(email, token):
     verification_link = url_for('auth_bp.verify_email', token=token, _external=True)
@@ -79,7 +79,7 @@ def login():
 @auth_bp.route('/verify/<token>', methods=['POST'])
 def verify_email(token):
     try:
-        email = s.loads(token, salt='email-verification-salt', max_age=3600)
+        email = current_app.config['SERIALIZER'].loads(token, salt='email-verification-salt', max_age=3600)
     except Exception:
         return jsonify({'message': 'O token de verificação é inválido ou expirou'}), 400
     

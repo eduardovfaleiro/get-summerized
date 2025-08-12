@@ -4,34 +4,16 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from flask_mail import Mail
 from itsdangerous import URLSafeTimedSerializer
 import sqlite3
 from pathlib import Path
 from dotenv import load_dotenv
+from backend.common import close_db, get_db, mail
 
 # Importe os Blueprints
 from backend.api.auth import auth_bp
 from backend.api.google import google_bp
 from backend.api.summary import summary_bp
-
-basedir = os.path.dirname(os.path.abspath(__file__))
-db_path = os.path.join(basedir, 'users.db')
-
-def get_db():
-    if 'db' not in g:
-        g.db = sqlite3.connect(db_path)
-    return g.db
-
-@app.teardown_appcontext
-def close_db(exception):
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
-
-# Cria as instâncias de Flask-Mail e do serializador fora da função
-# para que possam ser importadas e usadas nos blueprints.
-mail = Mail()
 
 env_path = Path(__file__).resolve().parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
