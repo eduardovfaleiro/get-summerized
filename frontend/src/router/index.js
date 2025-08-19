@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Login from '@/components/Login'
 import Register from '@/components/Register'
 import Welcome from '@/components/Welcome'
+import VerifyEmail from '@/components/VerifyEmail'
 import { jwtDecode } from 'jwt-decode';
 import { auth } from '@/auth'
 
@@ -16,7 +17,8 @@ const routes = [
     path: '/welcome',
     component: Welcome,
     meta: { requiresAuth: true }  // só acessível com token
-  }
+  },
+  { path: '/verify', component: VerifyEmail, meta: { hideHeader: true }}
 ]
 
 const router = new VueRouter({
