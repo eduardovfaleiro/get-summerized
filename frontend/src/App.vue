@@ -5,6 +5,7 @@
       color="white"
       dark
       style="position: fixed;"
+      v-if="!$route.meta.hideHeader"
     >
       <div 
         class="d-flex align-center"

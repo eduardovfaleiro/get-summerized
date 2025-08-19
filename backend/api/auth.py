@@ -11,7 +11,7 @@ def generate_verification_token(email):
     return current_app.config['SERIALIZER'].dumps(email, salt='email-verification-salt')
 
 def send_verification_email(email, token):
-    verification_link = url_for('auth_bp.verify_email', token=token, _external=True)
+    verification_link = f"http://localhost:8081/#/verify?token={token}"
     msg = Message(
         subject="Verifique seu e-mail",
         recipients=[email],
@@ -39,12 +39,12 @@ def register():
     if cursor.fetchone():
         return jsonify({'message': 'Usuário já existe'}), 409
 
+    token = generate_verification_token(email)
+    send_verification_email(email, token)
+
     hashed_pw = generate_password_hash(password)
     cursor.execute('INSERT INTO users (email, password, is_verified) VALUES (?, ?, ?)', (email, hashed_pw, False))
     conn.commit()
-
-    token = generate_verification_token(email)
-    send_verification_email(email, token)
 
     return jsonify({'message': 'Sua conta foi criada! Verifique seu e-mail para ativá-la.'}), 201
 
@@ -76,7 +76,7 @@ def login():
     access_token = generate_token(email)
     return jsonify({'access_token': access_token}), 200
 
-@auth_bp.route('/verify/<token>', methods=['POST'])
+@auth_bp.route('/verify/<token>', methods=['GET'])
 def verify_email(token):
     try:
         email = current_app.config['SERIALIZER'].loads(token, salt='email-verification-salt', max_age=3600)
