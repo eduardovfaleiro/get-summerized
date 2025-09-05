@@ -1,17 +1,19 @@
-# Use imagem base com Python
-FROM python:3.10-slim
+FROM python:3.11-slim
 
-# Define diretório de trabalho
+# 2. Definir o diretório de trabalho dentro do contêiner
 WORKDIR /app
 
-# Copia os arquivos
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+# 3. Copiar o arquivo de dependências e instalar
+# Copiamos primeiro para aproveitar o cache do Docker
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
+# 4. Copiar o restante do código do backend para o diretório de trabalho
 COPY . .
 
-# Expõe a porta
-EXPOSE 8080
+# 5. Expor a porta que o Flask vai rodar (geralmente 5000)
+EXPOSE 5000
 
-# Comando para iniciar o app
-CMD ["python", "app.py"]
+# 6. Comando para rodar a aplicação com Gunicorn (servidor de produção)
+# O comando 'app:app' se refere ao arquivo 'app.py' e à instância 'app' do Flask dentro dele.
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
