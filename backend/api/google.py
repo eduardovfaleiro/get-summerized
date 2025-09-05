@@ -1,7 +1,7 @@
 import os
 from flask import Blueprint, current_app, jsonify, redirect, url_for
 from authlib.integrations.flask_client import OAuth
-from backend.jwt_utils import generate_token
+from ..jwt_utils import generate_token
 
 oauth = OAuth()
 google_bp = Blueprint('google_bp', __name__)
