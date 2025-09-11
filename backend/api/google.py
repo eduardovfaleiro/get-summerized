@@ -47,4 +47,6 @@ def authorize_google():
 
     # Exemplo de resposta com redirecionamento + token
     access_token = generate_token(email)
-    return redirect(f"http://localhost:8081/#/welcome?token={access_token}")
+    
+    frontend_base_url = os.getenv('FRONTEND_URL')
+    return redirect(f"{frontend_base_url}/#/welcome?token={access_token}")

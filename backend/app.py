@@ -23,6 +23,8 @@ def create_app():
     app = Flask(__name__)
     init_oauth(app)
 
+    app.config['SERVER_NAME'] = os.getenv('SERVER_NAME')
+
     # --- Configurações da Aplicação ---
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
