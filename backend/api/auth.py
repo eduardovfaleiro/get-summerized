@@ -1,9 +1,10 @@
+import os
 from flask import Blueprint, current_app, jsonify, request, url_for
 from flask_mail import Message
 from werkzeug.security import generate_password_hash, check_password_hash
-from backend.jwt_utils import generate_token
-from backend.utils.validate_email import validate_email
-from backend.common import get_db, mail
+from ..jwt_utils import generate_token
+from ..utils.validate_email import validate_email
+from ..common import get_db, mail
 
 auth_bp = Blueprint('auth_bp', __name__)
 
@@ -11,7 +12,10 @@ def generate_verification_token(email):
     return current_app.config['SERIALIZER'].dumps(email, salt='email-verification-salt')
 
 def send_verification_email(email, token):
-    verification_link = f"http://localhost:8081/#/verify?token={token}"
+    frontend_base_url = os.getenv('FRONTEND_URL')
+    verification_path = f"/#/verify?token={token}"
+    verification_link = f"{frontend_base_url}{verification_path}"
+
     msg = Message(
         subject="Verifique seu e-mail",
         recipients=[email],

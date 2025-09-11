@@ -1,7 +1,7 @@
 import os
 from flask import Blueprint, current_app, jsonify, redirect, url_for
 from authlib.integrations.flask_client import OAuth
-from backend.jwt_utils import generate_token
+from ..jwt_utils import generate_token
 
 oauth = OAuth()
 google_bp = Blueprint('google_bp', __name__)
@@ -47,4 +47,6 @@ def authorize_google():
 
     # Exemplo de resposta com redirecionamento + token
     access_token = generate_token(email)
-    return redirect(f"http://localhost:8081/#/welcome?token={access_token}")
+    
+    frontend_base_url = os.getenv('FRONTEND_URL')
+    return redirect(f"{frontend_base_url}/#/welcome?token={access_token}")

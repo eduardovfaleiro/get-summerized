@@ -1,0 +1,21 @@
+# frontend/Dockerfile.dev
+
+# Usar a imagem do Node
+FROM node:18-alpine
+
+# Definir o diretório de trabalho
+WORKDIR /app
+
+# Copiar o package.json e instalar as dependências
+# Fazemos isso separado para aproveitar o cache do Docker
+COPY package*.json ./
+RUN npm install
+
+# Copia o resto do código (embora o volume vá sobrescrevê-lo, é bom ter)
+COPY . .
+
+# Expõe a porta do servidor de desenvolvimento do Vue (geralmente 8080)
+EXPOSE 8080
+
+# O comando para iniciar o servidor de desenvolvimento
+CMD ["npm", "run", "serve"]
