@@ -46,13 +46,13 @@
 </template>
 
 <script>
-import { auth } from '@/auth.js'
+import { auth, isTokenExpired } from '@/auth.js'
 
 export default {
   name: 'App',
   computed: {
     isLoggedIn() {
-      return !!auth.token
+      return !isTokenExpired(auth.token)
     }
   },
   methods: {

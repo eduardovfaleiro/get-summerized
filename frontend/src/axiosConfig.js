@@ -23,9 +23,6 @@ axios.interceptors.response.use(response => response, error => {
         case 429:
             showToastOncePerInterval('Você atingiu o limite de uso. Tente novamente mais tarde.')
             break
-        // default:
-        //     showToast('Ocorreu um erro inesperado.')
-        //     break
     }
 
     return Promise.reject(error)
