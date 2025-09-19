@@ -16,4 +16,4 @@ EXPOSE 5000
 
 # 6. Comando para rodar a aplicação com Gunicorn (servidor de produção)
 # O comando 'app:app' se refere ao arquivo 'app.py' e à instância 'app' do Flask dentro dele.
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:$PORT", "app:app"]

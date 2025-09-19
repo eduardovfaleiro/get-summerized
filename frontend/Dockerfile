@@ -24,10 +24,12 @@ FROM nginx:stable-alpine AS production
 # Copia os arquivos compilados do estágio de build para a pasta padrão do Nginx
 COPY --from=build /app/dist /usr/share/nginx/html
 
+COPY nginx.conf.template /etc/nginx/conf.d/default.conf.template
+
 # Copia uma configuração customizada do Nginx (opcional, mas recomendado)
 # COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expõe a porta 80, que é a porta padrão do Nginx
 EXPOSE 80
 
-# O comando para iniciar o Nginx já vem na imagem base
+CMD ["/bin/sh", "-c", "envsubst < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
