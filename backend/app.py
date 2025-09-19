@@ -88,4 +88,5 @@ def init_db(app):
 if __name__ == "__main__":
     app = create_app()
     init_db(app) # Inicializa o banco de dados
-    app.run(host="0.0.0.0", port=8080)
+    # O Docker já cuida disso
+    # app.run(host="0.0.0.0", port=8080)
