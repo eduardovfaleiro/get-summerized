@@ -159,15 +159,6 @@ export default {
     }
   },
   created() {
-    // axios
-    //   .get('/api/welcome')
-    //   .then(res => {
-    //     this.message = res.data.message
-    //   })
-    //   .catch(() => {
-    //     this.$router.push('/login')
-    //   })
-    
     safeRequest(() => {
       return axios.get('/api/config').then(res => {
         this.maxLength = res.data.MAX_LENGTH

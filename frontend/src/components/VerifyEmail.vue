@@ -63,8 +63,8 @@ export default {
     },
     methods: {
         async verifyToken() {
-            const token = this.$route.query.token
-
+            const token = this.$route.query.token_email_verification
+            
             if (!token) {
                 this.isLoading = false
                 this.errorMessage = 'Nenhum token de verificação encontrado. O link pode estar quebrado.';
@@ -75,6 +75,7 @@ export default {
                 const response = await axios.get(`/api/verify/${token}`);
                 
                 this.successMessage = response.data.message || 'Seu e-mail foi verificado com sucesso.';
+
             } catch (error) {
                 if (error.response && error.response.data && error.response.data.message) {
                 this.errorMessage = error.response.data.message;
