@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { auth } from './auth.js'
 import router from './router/index.js'
-import { showToast, showToastOncePerInterval } from './utils/toast.js'
+import {  showToastOncePerInterval } from './utils/toast.js'
 
 axios.interceptors.request.use(config => {
     if (auth.token) {
@@ -22,9 +22,6 @@ axios.interceptors.response.use(response => response, error => {
             break
         case 429:
             showToastOncePerInterval('Você atingiu o limite de uso. Tente novamente mais tarde.')
-            break
-        default:
-            showToast('Ocorreu um erro inesperado.')
             break
     }
 

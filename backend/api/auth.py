@@ -1,9 +1,10 @@
+import os
 from flask import Blueprint, current_app, jsonify, request, url_for
 from flask_mail import Message
 from werkzeug.security import generate_password_hash, check_password_hash
-from backend.jwt_utils import generate_token
-from backend.utils.validate_email import validate_email
-from backend.common import get_db, mail
+from ..jwt_utils import generate_token
+from ..utils.validate_email import validate_email
+from ..common import get_db, mail
 
 auth_bp = Blueprint('auth_bp', __name__)
 
@@ -11,7 +12,10 @@ def generate_verification_token(email):
     return current_app.config['SERIALIZER'].dumps(email, salt='email-verification-salt')
 
 def send_verification_email(email, token):
-    verification_link = url_for('auth_bp.verify_email', token=token, _external=True)
+    frontend_base_url = os.getenv('FRONTEND_URL')
+    verification_path = f"/#/verify?token_email_verification={token}"
+    verification_link = f"{frontend_base_url}{verification_path}"
+
     msg = Message(
         subject="Verifique seu e-mail",
         recipients=[email],
@@ -29,6 +33,9 @@ def register():
     if not email or not password:
         return jsonify({'message': 'E-mail ou senha ausentes'}), 400
     
+    if len(password) < 6:
+        return jsonify({'message': 'Senha deve ter no mínimo 6 caracteres'}), 400
+
     if not validate_email(email):
         return jsonify({'message': 'Formato de e-mail inválido'}), 400
 
@@ -39,12 +46,12 @@ def register():
     if cursor.fetchone():
         return jsonify({'message': 'Usuário já existe'}), 409
 
+    token = generate_verification_token(email)
+    send_verification_email(email, token)
+
     hashed_pw = generate_password_hash(password)
     cursor.execute('INSERT INTO users (email, password, is_verified) VALUES (?, ?, ?)', (email, hashed_pw, False))
     conn.commit()
-
-    token = generate_verification_token(email)
-    send_verification_email(email, token)
 
     return jsonify({'message': 'Sua conta foi criada! Verifique seu e-mail para ativá-la.'}), 201
 
@@ -67,7 +74,7 @@ def login():
     
     hashed_pw, is_verified = result
 
-    if not check_password_hash(result[0], hashed_pw):
+    if not check_password_hash(hashed_pw, password):
         return jsonify({'message': 'Credenciais inválidas'}), 401
         
     if not is_verified:
@@ -76,7 +83,7 @@ def login():
     access_token = generate_token(email)
     return jsonify({'access_token': access_token}), 200
 
-@auth_bp.route('/verify/<token>', methods=['POST'])
+@auth_bp.route('/verify/<token>', methods=['GET'])
 def verify_email(token):
     try:
         email = current_app.config['SERIALIZER'].loads(token, salt='email-verification-salt', max_age=3600)

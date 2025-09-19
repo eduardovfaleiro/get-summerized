@@ -4,7 +4,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
 from werkzeug.utils import secure_filename
 import google.generativeai as genai
-from backend.common import config
+from ..common import config
 
 summary_bp = Blueprint('summary_bp', __name__)
 

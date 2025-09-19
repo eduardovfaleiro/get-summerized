@@ -1,0 +1,24 @@
+# docker-compose.override.yml
+
+version: '3.8'
+
+services:
+  backend:
+    # Vamos substituir o comando padrão (gunicorn) pelo servidor de dev do Flask
+    command: flask --app app --debug run --host=0.0.0.0
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    # Vamos construir usando o nosso novo Dockerfile de desenvolvimento
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: vue_app_dev # Nome diferente para evitar conflito
+    ports:
+      - "8080:8080" # Mapeia a porta 8080 do host para a 8080 (Vue dev server) do contêiner
+    volumes:
+      # Mapeia o código fonte para dentro do contêiner para o hot-reload funcionar
+      - ./frontend:/app
+      # Um "truque" importante: evita que a pasta node_modules local sobrescreva a do contêiner
+      - /app/node_modules

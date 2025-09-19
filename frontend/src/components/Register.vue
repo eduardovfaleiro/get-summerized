@@ -123,19 +123,22 @@ export default {
           password: this.password
         })
         if (res.status === 201) {
-          this.successMessage = 'Usuário criado com sucesso!'
-          setTimeout(() => this.$router.push('/login'), 1500)
+          this.successMessage = res.data.message
+          setTimeout(() => {
+                      this.$router.push('/login');
+                      this.isSubmitting = false;
+                    }, 1500);
         }
       } catch (err) {
         if (err.response && err.response.status === 409) {
-          this.errorMessage = 'Usuário já existe.'
+          this.errorMessage = err.response.data.message
           this.invalidFields.email = true
         } else if (err.response && err.response.status === 400) {
           this.errorMessage = err.response.data.message
         } else {
           this.errorMessage = 'Erro ao cadastrar. Tente novamente.'
         }
-      } finally {
+
         this.isSubmitting = false
       }
     }

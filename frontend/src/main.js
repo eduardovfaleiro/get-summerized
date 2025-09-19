@@ -8,15 +8,24 @@ import "vue-toastification/dist/index.css"
 import { auth } from './auth.js'
 import { registerToast } from './utils/toast'
 
-// TODO(melhorar isso aqui)
 const hash = window.location.hash; // Ex: "#/welcome?token=abc123"
-const queryString = hash.split('?')[1]; // "token=abc123"
-const urlParams = new URLSearchParams(queryString);
-const token = urlParams.get('token');
 
-if (token) {
-  auth.login(token)
+// Verificação para garantir que a URL tem uma query string
+if (hash.includes('?')) {
+    const queryString = hash.split('?')[1];
+    const urlParams = new URLSearchParams(queryString);
+    const token = urlParams.get('token');
+
+    if (token) {
+        // 1. Loga o usuário
+        auth.login(token);
+
+        // 2. Remove o token da URL
+        const newHash = hash.split('?')[0]; // Pega a parte antes do '?' (ex: "#/welcome")
+        window.history.replaceState({}, document.title, newHash);
+    }
 }
+
 
 Vue.use(Toast)
 Vue.config.productionTip = false

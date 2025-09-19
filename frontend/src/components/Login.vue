@@ -84,8 +84,9 @@ export default {
           if (error.response && error.response.status == 401) {
             this.invalidFields.email = true;
             this.invalidFields.password = true;
-            this.errorMessage = 'E-mail ou senha incorretos.';
           }
+
+          this.errorMessage = error.response.data.message;
         });
     }
   }

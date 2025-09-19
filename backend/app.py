@@ -8,12 +8,12 @@ from itsdangerous import URLSafeTimedSerializer
 import sqlite3
 from pathlib import Path
 from dotenv import load_dotenv
-from backend.common import close_db, get_db, mail, config
+from .common import close_db, get_db, mail, config
 
 # Importe os Blueprints
-from backend.api.auth import auth_bp
-from backend.api.google import google_bp, init_oauth
-from backend.api.summary import summary_bp
+from .api.auth import auth_bp
+from .api.google import google_bp, init_oauth
+from .api.summary import summary_bp
 
 env_path = Path(__file__).resolve().parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
@@ -23,12 +23,14 @@ def create_app():
     app = Flask(__name__)
     init_oauth(app)
 
+    app.config['SERVER_NAME'] = os.getenv('SERVER_NAME')
+
     # --- Configurações da Aplicação ---
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
     app.config['MAIL_PORT'] = 587
-    app.config['MAIL_USE_SSL'] = True
-    app.config['MAIL_USE_TLS'] = False
+    app.config['MAIL_USE_SSL'] = False
+    app.config['MAIL_USE_TLS'] = True
     app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
     app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
     app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')

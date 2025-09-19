@@ -3,8 +3,9 @@ import VueRouter from 'vue-router'
 import Login from '@/components/Login'
 import Register from '@/components/Register'
 import Welcome from '@/components/Welcome'
-import { jwtDecode } from 'jwt-decode';
+import VerifyEmail from '@/components/VerifyEmail'
 import { auth } from '@/auth'
+import { isTokenExpired } from '@/auth'
 
 Vue.use(VueRouter)
 
@@ -16,7 +17,8 @@ const routes = [
     path: '/welcome',
     component: Welcome,
     meta: { requiresAuth: true }  // só acessível com token
-  }
+  },
+  { path: '/verify', component: VerifyEmail, meta: { hideHeader: true }}
 ]
 
 const router = new VueRouter({
@@ -24,18 +26,15 @@ const router = new VueRouter({
   routes
 })
 
-function isTokenExpired(token) {
-  if (!token) return true;
-  const { exp } = jwtDecode(token);
-  if (!exp) return true;
-  const now = Date.now() / 1000; // timestamp em segundos
-  return exp < now;
-}
+
 
 // Guarda global: bloqueia /welcome sem token
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from, next) => {  
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (isTokenExpired(auth.token)) return next('/login')
+    if (isTokenExpired(auth.token)) {
+      auth.logout()
+      return next('/login')
+    }
   }
   next()
 })
