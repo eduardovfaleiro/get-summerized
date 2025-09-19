@@ -13,7 +13,7 @@ def generate_verification_token(email):
 
 def send_verification_email(email, token):
     frontend_base_url = os.getenv('FRONTEND_URL')
-    verification_path = f"/#/verify?token={token}"
+    verification_path = f"/#/verify?token_email_verification={token}"
     verification_link = f"{frontend_base_url}{verification_path}"
 
     msg = Message(
@@ -33,6 +33,9 @@ def register():
     if not email or not password:
         return jsonify({'message': 'E-mail ou senha ausentes'}), 400
     
+    if len(password) < 6:
+        return jsonify({'message': 'Senha deve ter no mínimo 6 caracteres'}), 400
+
     if not validate_email(email):
         return jsonify({'message': 'Formato de e-mail inválido'}), 400
 
@@ -71,7 +74,7 @@ def login():
     
     hashed_pw, is_verified = result
 
-    if not check_password_hash(result[0], hashed_pw):
+    if not check_password_hash(hashed_pw, password):
         return jsonify({'message': 'Credenciais inválidas'}), 401
         
     if not is_verified:
