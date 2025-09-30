@@ -1,5 +1,6 @@
+import logging
 import os
-from flask import Flask, json, jsonify
+from flask import Flask, json, jsonify, session
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_limiter import Limiter
@@ -8,12 +9,14 @@ from itsdangerous import URLSafeTimedSerializer
 import sqlite3
 from pathlib import Path
 from dotenv import load_dotenv
-from .common import close_db, get_db, mail, config
+from common import close_db, get_db, mail, config
+from flask_session import Session
 
 # Importe os Blueprints
-from .api.auth import auth_bp
-from .api.google import google_bp, init_oauth
-from .api.summary import summary_bp
+from api.auth import auth_bp
+from api.google import google_bp, init_oauth
+from api.summary import summary_bp
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 env_path = Path(__file__).resolve().parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
@@ -21,9 +24,29 @@ load_dotenv(dotenv_path=env_path)
 def create_app():
     """Cria e configura a aplicação Flask."""
     app = Flask(__name__)
+
+    # Adicione a chave secreta para o URLSafeTimedSerializer
+    app.secret_key = os.getenv('SECRET_KEY')
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+
+    # Configurações do Flask-Session
+    app.config["SESSION_PERMANENT"] = False
+    app.config["SESSION_USE_SIGNER"] = True
+    app.config["SESSION_TYPE"] = "filesystem" # Use filesystem como um passo intermediário
+    app.config["SESSION_FILE_DIR"] = os.path.join(app.root_path, 'flask_session')
+
+    Session(app)
+
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.config['SESSION_COOKIE_SECURE'] = True
+
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+    )
+
     init_oauth(app)
 
-    app.config['SERVER_NAME'] = os.getenv('SERVER_NAME')
+    # app.config['SERVER_NAME'] = os.getenv('SERVER_NAME')
 
     # --- Configurações da Aplicação ---
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
@@ -35,8 +58,7 @@ def create_app():
     app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
     app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
 
-    # Adicione a chave secreta para o URLSafeTimedSerializer
-    app.secret_key = os.getenv('SECRET_KEY')
+
 
     # --- Inicializa as extensões do Flask ---
     CORS(app)
@@ -85,7 +107,9 @@ def init_db(app):
         conn.commit()
     # A conexão é fechada automaticamente pelo teardown do app_context
 
-if __name__ == "__main__":
-    app = create_app()
-    init_db(app) # Inicializa o banco de dados
-    app.run(host="0.0.0.0", port=8080)
+app = create_app()
+init_db(app) # Inicializa o banco de dados
+
+# if __name__ == "__main__":
+    # O Docker já cuida disso
+    # app.run(host="0.0.0.0", port=8080)

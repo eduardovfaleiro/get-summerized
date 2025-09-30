@@ -1,0 +1,12 @@
+# frontend/nginx.conf.template
+server {
+    # Escuta na porta fornecida pela variável de ambiente
+    listen ${PORT};
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html;
+        # Essencial para que o roteamento do Vue (History Mode) funcione
+        try_files $uri $uri/ /index.html;
+    }
+}
