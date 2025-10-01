@@ -51,7 +51,6 @@ Este projeto foi construído com uma arquitetura desacoplada, separando o fronte
 * **Flask:** Microframework para a criação da API REST.
 * **GenAI API:** API utilizada para a inteligência artificial generativa que cria os resumos.
 * **PyPDF2:** Biblioteca para extração de texto de arquivos PDF.
-* **Firebase Authentication:** Utilizado para gerenciar a autenticação de usuários de forma segura.
 * **Cloud Run:** Plataforma serverless do Google Cloud para hospedar o backend, garantindo escalabilidade automática.
 * **Docker:** Para containerizar a aplicação backend, garantindo um ambiente de execução consistente do desenvolvimento à produção.
 * **Google Secret Manager:** Para armazenamento e gerenciamento seguro de chaves de API e outras variáveis de ambiente sensíveis.
