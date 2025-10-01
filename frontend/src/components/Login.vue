@@ -19,13 +19,6 @@
           Entrar
         </v-btn>
 
-        <v-divider class="my-4"></v-divider>
-
-        <v-btn color="red darken-1" block @click="loginWithGoogle">
-          <v-icon left>mdi-google</v-icon>
-          Entrar com Google
-        </v-btn>
-
         <div class="text-center mt-4">
           <span>Não possui uma conta? <router-link to="/register">Cadastrar</router-link></span>
         </div>
@@ -37,7 +30,7 @@
 <script>
 import axios from 'axios';
 import { auth } from '@/auth'
-import { safeRequest } from '@/utils/safeRequest';
+// import { safeRequest } from '@/utils/safeRequest';
 
 export default {
   name: 'LoginPage',
@@ -53,13 +46,13 @@ export default {
     };
   },
   methods: {
-    async loginWithGoogle() {
-      const response = await safeRequest(() => axios.get('/api/login/google/initiate'))
+    // async loginWithGoogle() {
+    //   const response = await safeRequest(() => axios.get('/api/login/google/initiate'))
 
-      if (response) {
-        window.location.href = '/api/login/google'
-      }
-    },
+    //   if (response) {
+    //     window.location.href = '/api/login/google'
+    //   }
+    // },
     login() {
       this.invalidFields.email = false;
       this.invalidFields.password = false;
