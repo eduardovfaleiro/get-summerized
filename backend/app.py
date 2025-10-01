@@ -72,7 +72,7 @@ def create_app():
 
     # --- Registro de Blueprints ---
     app.register_blueprint(auth_bp, url_prefix='/api')
-    app.register_blueprint(google_bp, url_prefix='/api')
+    # app.register_blueprint(google_bp, url_prefix='/api')
     app.register_blueprint(summary_bp, url_prefix='/api')
 
     # --- Rotas da API (se houverem) ---
