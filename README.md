@@ -54,10 +54,3 @@ Este projeto foi construído com uma arquitetura desacoplada, separando o fronte
 * **Cloud Run:** Plataforma serverless do Google Cloud para hospedar o backend, garantindo escalabilidade automática.
 * **Docker:** Para containerizar a aplicação backend, garantindo um ambiente de execução consistente do desenvolvimento à produção.
 * **Google Secret Manager:** Para armazenamento e gerenciamento seguro de chaves de API e outras variáveis de ambiente sensíveis.
-
-## 👨‍💻 Autor
-
-Feito com ❤️ por **Eduardo Faleiro**
-
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-EduardoFaleiro-blue)]([https://www.linkedin.com/in/seu-linkedin/](https://www.linkedin.com/in/eduardo-faleiro-867b87254/))
-[![GitHub](https://img.shields.io/badge/GitHub-EduardoFaleiro-grey)]([https://github.com/seu-usuario](https://github.com/eduardovfaleiro))
